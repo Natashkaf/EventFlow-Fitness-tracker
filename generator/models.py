@@ -5,19 +5,19 @@ from dataclasses import dataclass
 from datetime import datetime
 
 class WorkoutType(enum.StrEnum):
-    REST = "rest"              # отдых
-    LIGHT = "light"            # лёгкая
-    MODERATE = "moderate"      # средняя
-    VIGOROUS = "vigorous"      # интенсивная
-    MAXIMUM = "maximum"        # максимальная
-
+    RUNNING = "running"
+    CYCLING = "cycling"
+    SWIMMING = "swimming"
+    STRENGTH = "strength"
+    YOGA = "yoga"
+    HIIT = "hiit"
 @dataclass(frozen=True, slots=True)
 class Device:
     """Справочная запись устройства (справочник/измерение)."""
     device_id: int
     name: str
     platform: str
-    manufacturer: str
+    model: str
     supports_gps: bool
     supports_heart_rate: bool
 
