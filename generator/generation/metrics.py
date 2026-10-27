@@ -10,7 +10,8 @@ from .seasonality import annual_factor, diurnal_factor
 @dataclass(frozen=True, slots=True)
 class DeviceProfile:
     """Профиль устройства — «фон» для генерации значений."""
-
+    mean_duration_seconds: int
+    duration_amplitude_seconds: int
     mean_steps: int
     steps_amplitude: int
     mean_heart_rate: int
@@ -95,3 +96,18 @@ class CaloriesSampler(MetricSampler):
         base = (minutes * type_factor)
 
         return round(base + rng.gauss(0.0, self._noise_std), 1)
+
+class DurationSampler(MetricSampler):
+    def __init__(self, profile: DeviceProfile, noise_std: float = 300.0) -> None:
+        self._profile = profile
+        self._noise_std = noise_std
+
+    def sample(self, ctx: WorkoutContext, rng: random.Random) -> float:
+        base = (
+                self._profile.mean_duration_seconds
+                + self._profile.duration_amplitude_seconds * annual_factor(ctx.at)
+                + self._profile.duration_amplitude_seconds * diurnal_factor(ctx.at)
+        )
+
+        value = base + rng.gauss(0.0, self._noise_std)
+        return round(_clamp(value, 300.0, 14400.0), 0)

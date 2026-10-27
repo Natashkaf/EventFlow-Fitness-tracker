@@ -8,6 +8,8 @@ from generator.models import Device
 from .metrics import DeviceProfile
 
 _GENERIC = DeviceProfile(
+    mean_duration_seconds=2700,
+    duration_amplitude_seconds=600,
     mean_steps = 5000,
     steps_amplitude = 500,
     mean_heart_rate= 140,
@@ -25,15 +27,15 @@ class _Template:
 _TEMPLATES: dict[str, _Template] = {
     "iPhone 15": _Template(
         "iPhone 15", "ios", "iPhone 15", True, True,
-        DeviceProfile(mean_steps=6000, steps_amplitude=400, mean_heart_rate=145, heart_rate_amplitude=8),
+        DeviceProfile(mean_duration_seconds=2700, duration_amplitude_seconds=600, mean_steps=6000, steps_amplitude=400, mean_heart_rate=145, heart_rate_amplitude=8),
     ),
     "Galaxy Watch": _Template(
         "Galaxy Watch", "android",  "Galaxy Watch 6", True, True,
-        DeviceProfile(mean_steps=7500, steps_amplitude=600, mean_heart_rate=150, heart_rate_amplitude=12)
+        DeviceProfile(mean_duration_seconds=2700, duration_amplitude_seconds=600, mean_steps=7500, steps_amplitude=600, mean_heart_rate=150, heart_rate_amplitude=12)
     ),
     "Web": _Template(
         "Web", "web", "Chrome", False, False,
-        DeviceProfile(mean_steps=0, steps_amplitude=0, mean_heart_rate=0, heart_rate_amplitude=0),
+        DeviceProfile(mean_duration_seconds=2700, duration_amplitude_seconds=600, mean_steps=0, steps_amplitude=0, mean_heart_rate=0, heart_rate_amplitude=0),
     )
 }
 
