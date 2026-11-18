@@ -42,7 +42,7 @@ class Workout:
       * метрики     — ``duration_seconds``, ``calories``, ``heart_rate``, ``steps``;
       * флаг ``is_anomaly`` помечает редкие выбросы для последующего анализа.
     """
-
+    city_id: int
     device_id: int
     timestamp: datetime
     duration_seconds: int
