@@ -5,10 +5,10 @@ from __future__ import annotations
 import random
 from datetime import datetime
 
-from generator.models import Device, Workout, WorkoutType
+from generator.generation.catalog import CityCatalog, DeviceCatalog
+from generator.models import City, Device, Workout,  WorkoutType
 
 from .anomalies import AnomalyKind, AnomalyPolicy
-from .catalog import DeviceCatalog
 from .metrics import (
     DeviceProfile,
     DurationSampler,
@@ -26,10 +26,12 @@ class WorkoutGenerator:
             self,
             device: Device,
             profile: DeviceProfile,
+            cities: list[City],
             anomaly_policy: AnomalyPolicy,
             rng: random.Random,
     ) -> None:
         self._device = device
+        self._cities = cities
         self._rng = rng
         self._anomaly_policy = anomaly_policy
         self._duration: MetricSampler = DurationSampler(profile)
@@ -46,6 +48,7 @@ class WorkoutGenerator:
         rng = self._rng
 
         workout_type = rng.choice(list(WorkoutType))
+        city = rng.choice(self._cities) if self._cities else None
 
         ctx = WorkoutContext(at=at, duration_seconds=0, workout_type=workout_type)
         duration = self._duration.sample(ctx, rng)
@@ -58,6 +61,7 @@ class WorkoutGenerator:
 
         return Workout(
             device_id=self._device.device_id,
+            city_id=city.city_id if city else 0,
             timestamp=at,
             workout_type=workout_type,
             duration_seconds=int(duration),
@@ -66,7 +70,6 @@ class WorkoutGenerator:
             calories=calories,
             is_anomaly=anomaly is not None,
         )
-
 
     def _apply_duration_anomaly(
             self, value: float, anomaly: AnomalyKind | None
@@ -103,16 +106,33 @@ class WorkoutGenerator:
 
 class BatchGenerator:
 
-    def __init__(self, catalog: DeviceCatalog, seed: int, anomaly_policy: AnomalyPolicy) -> None:
+    def __init__(
+        self,
+        catalog: DeviceCatalog,
+        city_catalog: CityCatalog,
+        seed: int,
+        anomaly_policy: AnomalyPolicy,
+    ) -> None:
+        self._city_catalog = city_catalog
         rng = random.Random(seed)
         self._per_device = [
-            WorkoutGenerator(d, catalog.profile_for(d), anomaly_policy, rng)
+            WorkoutGenerator(
+                d,
+                catalog.profile_for(d),
+                city_catalog.cities(),
+                anomaly_policy,
+                rng,
+            )
             for d in catalog.devices()
         ]
 
     @property
     def devices(self) -> list[Device]:
         return [g.device for g in self._per_device]
+
+    @property
+    def cities(self) -> list[City]:
+        return self._city_catalog.cities()
 
     def generate_batch(self, at: datetime, size: int) -> list[Workout]:
         if not self._per_device:
