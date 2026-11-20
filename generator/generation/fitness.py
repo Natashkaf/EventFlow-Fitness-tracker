@@ -59,6 +59,16 @@ class WorkoutGenerator:
         heart_rate = self._apply_heart_rate_anomaly(self._heart_rate.sample(ctx, rng), anomaly)
         calories = self._apply_calories_anomaly(self._calories.sample(ctx, rng), anomaly)
 
+        if workout_type in (WorkoutType.RUNNING, WorkoutType.CYCLING, WorkoutType.SWIMMING):
+            speed = {
+                WorkoutType.RUNNING: 2.8,
+                WorkoutType.CYCLING: 6.5,
+                WorkoutType.SWIMMING: 1.2,
+            }[workout_type]
+            distance = round(duration * speed * rng.uniform(0.85, 1.15), 1)
+        else:
+            distance = 0.0
+
         return Workout(
             device_id=self._device.device_id,
             city_id=city.city_id if city else 0,
@@ -69,6 +79,8 @@ class WorkoutGenerator:
             heart_rate=int(heart_rate),
             calories=calories,
             is_anomaly=anomaly is not None,
+            anomaly_kind=anomaly.value if anomaly else "none",
+            distance=distance,
         )
 
     def _apply_duration_anomaly(

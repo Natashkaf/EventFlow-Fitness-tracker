@@ -48,6 +48,8 @@ _WORKOUTS_COLUMNS = [
     "steps",
     "workout_type",
     "is_anomaly",
+    "anomaly_kind",
+    "distance"
 ]
 
 
@@ -111,7 +113,9 @@ class ClickHouseRepository(Repository):
                 heart_rate UInt16,
                 steps UInt32,
                 workout_type String,
-                is_anomaly UInt8
+                is_anomaly UInt8,
+                anomaly_kind String,
+                distance_m Float64   
             ) ENGINE = MergeTree
             PARTITION BY toYYYYMM(timestamp)
             ORDER BY (device_id, timestamp)
@@ -169,6 +173,8 @@ class ClickHouseRepository(Repository):
                 w.steps,
                 w.workout_type.value,
                 int(w.is_anomaly),
+                w.anomaly_kind,
+                w.distance,
             )
             for w in workouts
         ]

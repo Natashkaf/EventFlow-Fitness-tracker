@@ -51,3 +51,5 @@ class Workout:
     steps: int
     workout_type: WorkoutType
     is_anomaly: bool
+    distance: float
+    anomaly_kind: str
